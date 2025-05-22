@@ -1,11 +1,10 @@
-﻿using System.Reflection.Metadata.Ecma335;
-
-class Program
+﻿class Program
 {
     static void Main(string[] args)
     {
         DateOnly today = DateOnly.FromDateTime(DateTime.Now);
         List<Event> events = new List<Event>();
+        var stats = new Dictionary<DateOnly, int>();
 
         while (true)
         {
@@ -40,14 +39,6 @@ class Program
                     Console.WriteLine("Žádné události nejsou uloženy.");
                     continue;
                 }
-                var stats = new Dictionary<DateOnly, int>();
-                foreach (var ev in events)
-                {
-                    if (stats.ContainsKey(ev.Date))
-                        stats[ev.Date]++;
-                    else
-                        stats[ev.Date] = 1;
-                }
                 foreach (var pair in stats)
                 {
                     Console.WriteLine($"Date: {pair.Key.ToString("yyyy-MM-dd")}: events: {pair.Value}");
@@ -55,7 +46,7 @@ class Program
             }
             else if (input.StartsWith("EVENT;"))
             {
-                string[] parts = input.Split(';');
+                string[] parts = input.Split(';'); // nit: pomocna metoda na parsovani
                 if (parts.Length != 3)
                 {
                     Console.WriteLine("Špatný formát příkazu EVENT. Správný formát: EVENT;název;datum (YYYY-MM-DD)");
@@ -69,7 +60,7 @@ class Program
                     Console.WriteLine("Špatný formát data. Správný formát: YYYY-MM-DD");
                     continue;
                 }
-                events.Add(new Event(name, date));
+                AddEvent(new Event(name, date), stats, events);
                 Console.WriteLine($"Událost '{name}' s datem {date.ToString("yyyy-MM-dd")} byla přidána.");
             }
             else
@@ -78,9 +69,19 @@ class Program
             }
         }
     }
+
+    static void AddEvent(Event ev, Dictionary<DateOnly, int> stats, List<Event> events)
+    {
+        events.Add(ev);
+
+        if (stats.ContainsKey(ev.Date))
+            stats[ev.Date]++;
+        else
+            stats[ev.Date] = 1;
+    }
 }
 
-public class Event
+public class Event // Separatni soubor
 {
     public string Name { get; set; }
     public DateOnly Date { get; set; }
